@@ -14,3 +14,12 @@ export interface DailyLog {
   happyEvents: number;
   toughEvents: number;
 }
+
+export interface FeedbackEntry {
+  id: string;
+  timestamp: Date;
+  email: string;
+  content: string;
+  userAgent: string;
+  page: string;
+}

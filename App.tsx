@@ -19,6 +19,7 @@ import {
 import { fetchAds, AdItem } from './services/geminiService';
 import GoogleAd from './components/GoogleAd';
 import RollingAdBanner from './components/RollingAdBanner';
+import FeedbackWidget from './components/FeedbackWidget';
 
 const toYYYYMMDD = (date: Date): string => {
   return date.toISOString().split('T')[0];
@@ -428,6 +429,9 @@ function App() {
       <footer className="text-center py-6 text-slate-500 text-sm">
         <p>&copy; 2025 AI 행운습관 코치. All rights reserved.</p>
       </footer>
+      
+      {/* 피드백 위젯 */}
+      <FeedbackWidget />
     </div>
   );
 }
