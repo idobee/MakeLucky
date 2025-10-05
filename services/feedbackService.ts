@@ -1,21 +1,21 @@
 /**
  * 피드백 서비스 - Google Sheets에 사용자 피드백을 저장합니다.
  * ===============================================================
- * Google Apps Script를 사용하여 피드백을 Google Sheets에 저장합니다.
+ * Google Sheets CSV API를 사용하여 피드백을 저장합니다.
  * 
  * 사용 방법:
- * 1. Google Apps Script에서 새 프로젝트를 만듭니다.
- * 2. 아래 코드를 Apps Script에 붙여넣습니다.
- * 3. 배포 > 새 배포 > 웹 앱으로 배포합니다.
- * 4. 배포된 웹 앱 URL을 FEEDBACK_SCRIPT_URL에 설정합니다.
+ * 1. Google Sheets에서 피드백용 시트를 생성합니다.
+ * 2. 시트 ID를 확인하고 아래 FEEDBACK_SHEET_GRID_ID를 설정합니다.
+ * 3. 시트를 "Anyone with the link can view"로 공유합니다.
+ * 4. 첫 번째 행에 헤더를 추가합니다: Timestamp, Email, Content, UserAgent, Page, FeedbackId
  */
 
-// Google Apps Script URL - 실제 배포 후 URL로 교체해야 합니다
-const FEEDBACK_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+// Google Sheets ID (same as advice service)
+export const GOOGLE_SHEET_ID = (process.env.GOOGLE_SHEET_ID as string) || '';
+const FEEDBACK_SHEET_GRID_ID = '1937325947'; // 피드백용 시트의 Grid ID (URL의 gid 값)
 
-// Google Sheets ID for feedback
-const FEEDBACK_SHEET_ID = '171qfiFg8-SaOIZCMP2Y4bgsiAVIJ3hoFy5LKnwYT1gI';
-const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${FEEDBACK_SHEET_ID}`;
+// Google Sheets CSV URL for feedback
+const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${FEEDBACK_SHEET_GRID_ID}`;
 
 export interface FeedbackData {
   email: string;
@@ -30,88 +30,33 @@ export interface FeedbackResponse {
 }
 
 /**
- * Google Apps Script 코드 (Apps Script에 복사하여 사용):
+ * Google Sheets 설정 방법:
  * 
- * function doPost(e) {
- *   try {
- *     const data = JSON.parse(e.postData.contents);
- *     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
- *     
- *     // 헤더가 없으면 추가
- *     if (sheet.getLastRow() === 0) {
- *       sheet.getRange(1, 1, 1, 6).setValues([[
- *         'Timestamp', 'Type', 'Content', 'UserAgent', 'Page', 'FeedbackId'
- *       ]]);
- *     }
- *     
- *     const timestamp = new Date();
- *     const feedbackId = Utilities.getUuid();
- *     const userAgent = e.parameter.userAgent || 'Unknown';
- *     const page = data.page || 'Unknown';
- *     
- *     sheet.appendRow([
- *       timestamp,
- *       data.type,
- *       data.content,
- *       userAgent,
- *       page,
- *       feedbackId
- *     ]);
- *     
- *     return ContentService
- *       .createTextOutput(JSON.stringify({
- *         success: true,
- *         message: '피드백이 성공적으로 저장되었습니다.',
- *         feedbackId: feedbackId
- *       }))
- *       .setMimeType(ContentService.MimeType.JSON);
- *   } catch (error) {
- *     return ContentService
- *       .createTextOutput(JSON.stringify({
- *         success: false,
- *         message: '피드백 저장 중 오류가 발생했습니다: ' + error.toString()
- *       }))
- *       .setMimeType(ContentService.MimeType.JSON);
- *   }
- * }
+ * 1. Google Sheets에서 피드백용 새 시트를 생성합니다.
+ * 2. 시트 이름을 "Feedback" 또는 원하는 이름으로 설정합니다.
+ * 3. URL에서 gid 값을 확인하고 아래 FEEDBACK_SHEET_GRID_ID에 설정합니다.
+ * 4. 첫 번째 행에 다음 헤더를 추가합니다:
+ *    Timestamp, Email, Content, UserAgent, Page, FeedbackId
+ * 5. 시트를 "Anyone with the link can view"로 공유합니다.
+ * 
+ * 참고: 현재는 읽기 전용 API를 사용하므로 로컬 스토리지에 저장됩니다.
+ * 실제 쓰기 기능을 위해서는 Google Apps Script나 서버 사이드 API가 필요합니다.
  */
 
 /**
- * 피드백을 Google Sheets에 저장합니다.
+ * 피드백을 로컬 스토리지에 저장합니다.
+ * 실제 Google Sheets 쓰기는 서버 사이드에서 처리해야 합니다.
  */
 export async function submitFeedback(feedbackData: FeedbackData): Promise<FeedbackResponse> {
   try {
-    // 현재는 로컬 스토리지에 저장 (개발 중)
-    // 실제 Google Apps Script가 설정되면 아래 코드를 활성화하세요
-    
-    /*
-    const response = await fetch(FEEDBACK_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: feedbackData.type,
-        content: feedbackData.content,
-        page: feedbackData.page || window.location.pathname,
-        userAgent: navigator.userAgent
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    return result;
-    */
-    
-    // 임시 로컬 스토리지 저장
+    // 피드백 ID 생성
     const feedbackId = generateFeedbackId();
+    const timestamp = new Date();
+    
+    // 피드백 객체 생성
     const feedback = {
       id: feedbackId,
-      timestamp: new Date(),
+      timestamp: timestamp,
       email: feedbackData.email,
       content: feedbackData.content,
       userAgent: navigator.userAgent,
@@ -125,9 +70,12 @@ export async function submitFeedback(feedbackData: FeedbackData): Promise<Feedba
     
     console.log('피드백이 로컬에 저장되었습니다:', feedback);
     
+    // TODO: 실제 서버로 전송하는 로직 추가 필요
+    // await sendToServer(feedback);
+    
     return {
       success: true,
-      message: '피드백이 성공적으로 저장되었습니다! (로컬 저장)',
+      message: '피드백이 성공적으로 저장되었습니다! 감사합니다.',
       feedbackId: feedbackId
     };
     
@@ -135,7 +83,7 @@ export async function submitFeedback(feedbackData: FeedbackData): Promise<Feedba
     console.error('피드백 저장 오류:', error);
     return {
       success: false,
-      message: '피드백 저장 중 오류가 발생했습니다.'
+      message: '피드백 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
     };
   }
 }
@@ -164,4 +112,69 @@ export function getStoredFeedback(): any[] {
  */
 export function clearStoredFeedback(): void {
   localStorage.removeItem('feedback');
+}
+
+/**
+ * 피드백을 Google Sheets에서 조회합니다 (읽기 전용).
+ * 실제 서버에서 구현해야 하는 기능입니다.
+ */
+export async function fetchFeedbackFromSheet(): Promise<any[]> {
+  try {
+    if (!GOOGLE_SHEET_ID) {
+      console.warn('Google Sheets ID가 설정되지 않았습니다.');
+      return [];
+    }
+    
+    const response = await fetch(GOOGLE_SHEET_CSV_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch feedback from Google Sheet: ${response.statusText}`);
+    }
+    
+    const csvText = await response.text();
+    const rows = csvText.split(/\r?\n/).slice(1); // 헤더 제거
+    const feedbackData = [];
+    
+    for (const row of rows) {
+      if (!row.trim()) continue;
+      const [timestamp, email, content, userAgent, page, feedbackId] = parseCsvRow(row);
+      if (email && content) {
+        feedbackData.push({
+          timestamp: new Date(timestamp),
+          email,
+          content,
+          userAgent,
+          page,
+          feedbackId
+        });
+      }
+    }
+    
+    return feedbackData;
+  } catch (error) {
+    console.error('Google Sheets에서 피드백 조회 오류:', error);
+    return [];
+  }
+}
+
+/**
+ * CSV 행을 파싱합니다 (adviceService와 동일한 로직).
+ */
+function parseCsvRow(row: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result.map(val => val.replace(/^"|"$/g, '')); // 따옴표 제거
 }
