@@ -16,9 +16,10 @@ View your app in AI Studio: https://ai.studio/apps/drive/1VmdDsZ50Vq6qN7ZqgPlbxf
    ```bash
    npm install
    ```
-2. `.env.local` 파일에 `GEMINI_API_KEY` 설정:
+2. `.env.local` 파일에 필요한 환경변수 설정:
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
+   GOOGLE_SHEET_ID=your_google_sheet_id_here
    ```
 3. 앱 실행:
    ```bash
@@ -44,7 +45,9 @@ git push -u origin main
 ### 3. GitHub Pages 설정
 1. GitHub 저장소의 Settings 탭으로 이동
 2. Pages 섹션에서 Source를 "GitHub Actions"로 설정
-3. 저장소의 Settings > Secrets and variables > Actions에서 `GEMINI_API_KEY` 추가
+3. 저장소의 Settings > Secrets and variables > Actions에서 다음 환경변수 추가:
+   - `GEMINI_API_KEY`: Gemini API 키
+   - `GOOGLE_SHEET_ID`: Google Sheets ID
 
 ### 4. 자동 배포
 - main 브랜치에 코드를 푸시하면 자동으로 GitHub Pages에 배포됩니다
