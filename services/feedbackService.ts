@@ -12,7 +12,7 @@
 
 // Google Sheets ID (same as advice service)
 export const GOOGLE_SHEET_ID = (process.env.GOOGLE_SHEET_ID as string) || '';
-const FEEDBACK_SHEET_GRID_ID = '1937325947'; // 피드백용 시트의 Grid ID (URL의 gid 값)
+const FEEDBACK_SHEET_GRID_ID = '1775510369'; // 피드백용 시트의 Grid ID (URL의 gid 값)
 
 // Google Sheets CSV URL for feedback
 const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${FEEDBACK_SHEET_GRID_ID}`;
