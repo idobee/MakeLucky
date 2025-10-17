@@ -430,7 +430,10 @@ function App() {
                 <RollingAdBanner adItems={adItems} />
             </div>
             <div className="w-full md:w-[70%]">
-                <GoogleAd />
+                <GoogleAd 
+                  client="ca-pub-5879355763055311" 
+                  slot={import.meta.env.VITE_ADSENSE_SLOT_ID} 
+                />
             </div>
         </div>
       </div>
