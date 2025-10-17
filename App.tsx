@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import LuckInput from './components/LuckInput';
 import ResultDisplay from './components/ResultDisplay';
 import WeeklyReport from './components/WeeklyReport';
@@ -132,6 +133,13 @@ function App() {
   const todayKey = toYYYYMMDD(currentDate);
   const isToday = toYYYYMMDD(new Date()) === todayKey;
 
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => !isToday && changeDate(1),
+    onSwipedRight: () => changeDate(-1),
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+  });
+
   const currentLog = allLogs[todayKey] || {
     goodWords: [], badWords: [],
     goodThoughts: 0, badThoughts: 0,
@@ -254,7 +262,7 @@ function App() {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800">
+    <div {...swipeHandlers} className="bg-slate-50 min-h-screen text-slate-800">
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <h1 className="text-3xl font-bold text-slate-900 text-center">
