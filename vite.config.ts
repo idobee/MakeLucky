@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
-      base: mode === 'production' ? '/MakeLucky/' : '/', // 프로덕션에서만 base path 설정
+      base: mode === 'production' ? '/MakeLucky/' : '/',  
       server: {
         port: 3000,
         host: '0.0.0.0',

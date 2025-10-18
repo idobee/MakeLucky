@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",         // 'development' 모드로 실행
-    "build": "vite build", // 'production' 모드로 실행
+    "dev": "vite",         
+    "build": "vite build",  
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist"
   },
