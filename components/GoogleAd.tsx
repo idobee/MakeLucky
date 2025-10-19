@@ -9,19 +9,29 @@ declare global {
 
 // ❗️TODO: 아래 두 값을 당신의 실제 구글 애드센스 정보로 교체하세요.
 // 1. 당신의 애드센스 게시자 ID (ca-pub-XXXXXXXXXXXXXXXX)
-const AD_CLIENT = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID as string; 
+const AD_CLIENT = (import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_CLIENT_ID as string | undefined;
 // 2. 당신이 생성한 광고 단위의 슬롯 ID (숫자 10자리)
 const AD_SLOT = "6971312071";
 
-const IS_PLACEHOLDER = AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
+const IS_PLACEHOLDER = !AD_CLIENT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
 
 const GoogleAd: React.FC = () => {
   useEffect(() => {
-    // 플레이스홀더 ID가 사용 중일 때는 광고를 요청하지 않습니다.
     if (IS_PLACEHOLDER) return;
 
-    // SPA 환경에서 "No slot size for availableWidth=0" 오류를 방지하기 위해
-    // 레이아웃이 계산될 시간을 준 후 광고를 요청합니다.
+    // Inject AdSense script once
+    const existing = document.querySelector('script[data-origin="adsense"]') as HTMLScriptElement | null;
+    if (!existing) {
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(
+        AD_CLIENT as string
+      )}`;
+      s.setAttribute('data-origin', 'adsense');
+      s.crossOrigin = 'anonymous';
+      document.head.appendChild(s);
+    }
+
     const adPushTimeout = setTimeout(() => {
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});

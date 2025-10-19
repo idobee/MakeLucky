@@ -18,6 +18,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_GOOGLE_ADSENSE_CLIENT_ID: ${{ vars.VITE_GOOGLE_ADSENSE_CLIENT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,6 +32,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Write Vite env (production)
+        run: |
+          if [ -n "${VITE_GOOGLE_ADSENSE_CLIENT_ID}" ]; then \
+            echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=${VITE_GOOGLE_ADSENSE_CLIENT_ID}" > .env.production; \
+            echo "Created .env.production with VITE_GOOGLE_ADSENSE_CLIENT_ID"; \
+          else \
+            echo "VITE_GOOGLE_ADSENSE_CLIENT_ID is not set in repository variables; proceeding without ads"; \
+          fi
 
       - name: Build
         run: npm run build
