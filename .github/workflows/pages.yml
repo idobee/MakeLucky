@@ -19,6 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      # Prefer repository Variables; Secrets will be read in the write step if Variables are empty
       VITE_GOOGLE_ADSENSE_CLIENT_ID: ${{ vars.VITE_GOOGLE_ADSENSE_CLIENT_ID }}
       VITE_GOOGLE_ADSENSE_SLOT_ID: ${{ vars.VITE_GOOGLE_ADSENSE_SLOT_ID }}
     steps:
@@ -35,20 +36,23 @@ jobs:
         run: npm ci
 
       - name: Write Vite env (production)
+        env:
+          GH_VAR_CLIENT: ${{ vars.VITE_GOOGLE_ADSENSE_CLIENT_ID }}
+          GH_VAR_SLOT: ${{ vars.VITE_GOOGLE_ADSENSE_SLOT_ID }}
+          GH_SECRET_CLIENT: ${{ secrets.VITE_GOOGLE_ADSENSE_CLIENT_ID }}
+          GH_SECRET_SLOT: ${{ secrets.VITE_GOOGLE_ADSENSE_SLOT_ID }}
         run: |
           touch .env.production
-          if [ -n "${VITE_GOOGLE_ADSENSE_CLIENT_ID}" ]; then \
-            echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=${VITE_GOOGLE_ADSENSE_CLIENT_ID}" >> .env.production; \
-          fi
-          if [ -n "${VITE_GOOGLE_ADSENSE_SLOT_ID}" ]; then \
-            echo "VITE_GOOGLE_ADSENSE_SLOT_ID=${VITE_GOOGLE_ADSENSE_SLOT_ID}" >> .env.production; \
-          fi
+          CLIENT_VAL="${GH_VAR_CLIENT:-${GH_SECRET_CLIENT}}"
+          SLOT_VAL="${GH_VAR_SLOT:-${GH_SECRET_SLOT}}"
+          if [ -n "${CLIENT_VAL}" ]; then echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=${CLIENT_VAL}" >> .env.production; fi
+          if [ -n "${SLOT_VAL}" ]; then echo "VITE_GOOGLE_ADSENSE_SLOT_ID=${SLOT_VAL}" >> .env.production; fi
           echo "Generated .env.production with available variables"
 
       - name: Debug variables presence (non-sensitive)
         run: |
-          if [ -n "${VITE_GOOGLE_ADSENSE_CLIENT_ID}" ]; then echo "CLIENT_ID: present"; else echo "CLIENT_ID: MISSING"; fi
-          if [ -n "${VITE_GOOGLE_ADSENSE_SLOT_ID}" ]; then echo "SLOT_ID: present"; else echo "SLOT_ID: MISSING"; fi
+          if [ -f .env.production ]; then grep -q "VITE_GOOGLE_ADSENSE_CLIENT_ID=" .env.production && echo "CLIENT_ID: present" || echo "CLIENT_ID: MISSING"; else echo ".env.production missing"; fi
+          if [ -f .env.production ]; then grep -q "VITE_GOOGLE_ADSENSE_SLOT_ID=" .env.production && echo "SLOT_ID: present" || echo "SLOT_ID: MISSING"; fi
 
       - name: Build
         run: npm run build
