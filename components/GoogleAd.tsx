@@ -7,18 +7,28 @@ declare global {
   }
 }
 
-// ❗️TODO: 아래 두 값을 당신의 실제 구글 애드센스 정보로 교체하세요.
-// 1. 당신의 애드센스 게시자 ID (ca-pub-XXXXXXXXXXXXXXXX)
+// 환경변수에서 구글 애드센스 값을 읽어옵니다.
+// 로컬 개발: .env.local에 VITE_GOOGLE_ADSENSE_CLIENT_ID, VITE_GOOGLE_ADSENSE_SLOT_ID 설정
+// GitHub Pages: Repo Settings → Secrets and variables → Actions → Variables 에 동일 키로 설정
 const AD_CLIENT = (import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_CLIENT_ID as string | undefined;
-// 2. 당신이 생성한 광고 단위의 슬롯 ID (숫자 10자리)
-//    .env의 VITE_GOOGLE_ADSENSE_SLOT_ID로 설정할 수 있으며, 미설정 시 아래 기본값을 사용합니다.
+// 슬롯 ID는 선택사항이지만, 실제 광고 노출을 위해 본인 슬롯을 설정하는 것을 권장합니다.
 const AD_SLOT = ((import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_SLOT_ID as string | undefined) || "6971312071";
 
 const IS_PLACEHOLDER = !AD_CLIENT || !AD_SLOT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
 
 const GoogleAd: React.FC = () => {
   useEffect(() => {
-    if (IS_PLACEHOLDER) return;
+    if (IS_PLACEHOLDER) {
+      // 개발자 콘솔에 상세 가이드 노출
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[GoogleAd] 광고 플레이스홀더 상태입니다. 환경변수를 설정하세요:\n" +
+          " - 로컬: .env.local에 VITE_GOOGLE_ADSENSE_CLIENT_ID=ca-pub-xxxxxxxxxxxxxxxx / VITE_GOOGLE_ADSENSE_SLOT_ID=xxxxxxxxxx\n" +
+          " - GitHub Pages: Settings → Secrets and variables → Actions → Variables에 동일 키 추가\n" +
+          `현재 값: AD_CLIENT='${AD_CLIENT ?? ''}', AD_SLOT='${AD_SLOT ?? ''}'`
+      );
+      return;
+    }
 
     // Inject AdSense script once
     const existing = document.querySelector('script[data-origin="adsense"]') as HTMLScriptElement | null;
@@ -49,12 +59,17 @@ const GoogleAd: React.FC = () => {
       {IS_PLACEHOLDER ? (
         <div className="text-slate-500">
           <h4 className="font-bold text-lg mb-2">광고 영역</h4>
-          <p className="text-sm">
-            실제 광고를 표시하려면, <br />
-            <code className="bg-slate-200 text-rose-600 font-mono text-xs p-1 rounded">components/GoogleAd.tsx</code> 파일 상단의<br />
-            <code className="bg-slate-200 text-rose-600 font-mono text-xs p-1 rounded">AD_CLIENT</code>와 <code className="bg-slate-200 text-rose-600 font-mono text-xs p-1 rounded">AD_SLOT</code> 값을<br />
-            당신의 애드센스 ID로 교체해주세요.
-          </p>
+          <div className="text-sm space-y-1">
+            <p>실제 광고를 보려면 환경변수를 설정하세요.</p>
+            <p>
+              로컬: <code className="bg-slate-200 text-rose-600 font-mono text-xs p-1 rounded">.env.local</code>에
+              <code className="bg-slate-200 text-rose-600 font-mono text-xs p-1 rounded ml-1">VITE_GOOGLE_ADSENSE_CLIENT_ID</code>,
+              <code className="bg-slate-200 text-rose-600 font-mono text-xs p-1 rounded ml-1">VITE_GOOGLE_ADSENSE_SLOT_ID</code>
+            </p>
+            <p>
+              배포(GitHub Pages): 저장소 Settings → Secrets and variables → Actions → Variables에 동일 키 추가
+            </p>
+          </div>
         </div>
       ) : (
         <ins
