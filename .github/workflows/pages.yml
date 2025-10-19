@@ -45,6 +45,11 @@ jobs:
           fi
           echo "Generated .env.production with available variables"
 
+      - name: Debug variables presence (non-sensitive)
+        run: |
+          if [ -n "${VITE_GOOGLE_ADSENSE_CLIENT_ID}" ]; then echo "CLIENT_ID: present"; else echo "CLIENT_ID: MISSING"; fi
+          if [ -n "${VITE_GOOGLE_ADSENSE_SLOT_ID}" ]; then echo "SLOT_ID: present"; else echo "SLOT_ID: MISSING"; fi
+
       - name: Build
         run: npm run build
 
