@@ -8,11 +8,12 @@ declare global {
 }
 
 // 환경변수에서 구글 애드센스 값을 읽어옵니다.
+// 반드시 import.meta.env.VITE_* 형태로 접근해야 Vite가 빌드 시 정적으로 치환합니다.
 // 로컬 개발: .env.local에 VITE_GOOGLE_ADSENSE_CLIENT_ID, VITE_GOOGLE_ADSENSE_SLOT_ID 설정
 // GitHub Pages: Repo Settings → Secrets and variables → Actions → Variables 에 동일 키로 설정
-const AD_CLIENT = (import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_CLIENT_ID as string | undefined;
+const AD_CLIENT: string | undefined = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID as any;
 // 슬롯 ID는 선택사항이지만, 실제 광고 노출을 위해 본인 슬롯을 설정하는 것을 권장합니다.
-const AD_SLOT = ((import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_SLOT_ID as string | undefined) || "6971312071";
+const AD_SLOT: string = (import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_ID as any) || "6971312071";
 
 const IS_PLACEHOLDER = !AD_CLIENT || !AD_SLOT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
 
