@@ -56,7 +56,7 @@ const GoogleAd: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full h-full border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center p-4">
+    <div className="w-full border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center p-4">
       {IS_PLACEHOLDER ? (
         <div className="text-slate-500">
           <h4 className="font-bold text-lg mb-2">광고 영역</h4>
@@ -75,10 +75,10 @@ const GoogleAd: React.FC = () => {
       ) : (
         <ins
           className="adsbygoogle"
-          style={{ display: 'block', width: '100%', height: '100%' }}
+          style={{ display: 'block', width: '100%', minHeight: '90px' }}
           data-ad-client={AD_CLIENT as string}
           data-ad-slot={AD_SLOT as string}
-          data-ad-format="horizontal"
+          data-ad-format="auto"
           data-full-width-responsive="true"
         ></ins>
       )}
