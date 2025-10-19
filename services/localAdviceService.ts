@@ -1,3 +1,8 @@
+// Load advice data at build time to avoid runtime fetch/path issues (works on GitHub Pages)
+// Vite supports importing JSON as a module by default
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - typing JSON import as AdviceData via cast below
+import adviceDataRaw from '../advice.json';
 // types.ts or a new types file might be better, but for simplicity let's define it here.
 export interface LogSummaryForAdvice {
   goodThoughts: number;
@@ -25,27 +30,10 @@ interface AdviceData {
 let adviceData: AdviceData | null = null;
 
 async function loadAdviceData(): Promise<AdviceData> {
-  if (adviceData) {
-    return adviceData;
-  }
-  try {
-      // Use Vite base-aware path so it works under GitHub Pages (e.g., /MakeLucky/)
-      const base = (import.meta as any).env?.BASE_URL ?? '/';
-    // Normalize trailing slash and prefer the asset under public/ (copied to dist root)
-    const normalizedBase = typeof base === 'string' && base.endsWith('/') ? base : `${base}/`;
-    const url = `${normalizedBase}advice.json`;
-      const response = await fetch(url, { cache: 'no-cache' });
-    if (!response.ok) {
-      throw new Error('Failed to load advice data');
-    }
-    const data = await response.json();
-    adviceData = data;
-    return data;
-  } catch (error) {
-    console.error('Error loading advice.json:', error);
-    // Return a fallback or throw
-    throw error;
-  }
+  if (adviceData) return adviceData;
+  const data = adviceDataRaw as AdviceData;
+  adviceData = data;
+  return data;
 }
 
 function getRandomItem<T>(arr: T[]): T {
