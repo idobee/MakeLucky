@@ -80,6 +80,7 @@ const GoogleAd: React.FC = () => {
           data-ad-slot={AD_SLOT as string}
           data-ad-format="auto"
           data-full-width-responsive="true"
+          data-adtest={import.meta.env.MODE !== 'production' ? 'on' : undefined}
         ></ins>
       )}
     </div>
