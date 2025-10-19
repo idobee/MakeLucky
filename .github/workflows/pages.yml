@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_GOOGLE_ADSENSE_CLIENT_ID: ${{ vars.VITE_GOOGLE_ADSENSE_CLIENT_ID }}
+      VITE_GOOGLE_ADSENSE_SLOT_ID: ${{ vars.VITE_GOOGLE_ADSENSE_SLOT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,12 +36,14 @@ jobs:
 
       - name: Write Vite env (production)
         run: |
+          touch .env.production
           if [ -n "${VITE_GOOGLE_ADSENSE_CLIENT_ID}" ]; then \
-            echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=${VITE_GOOGLE_ADSENSE_CLIENT_ID}" > .env.production; \
-            echo "Created .env.production with VITE_GOOGLE_ADSENSE_CLIENT_ID"; \
-          else \
-            echo "VITE_GOOGLE_ADSENSE_CLIENT_ID is not set in repository variables; proceeding without ads"; \
+            echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=${VITE_GOOGLE_ADSENSE_CLIENT_ID}" >> .env.production; \
           fi
+          if [ -n "${VITE_GOOGLE_ADSENSE_SLOT_ID}" ]; then \
+            echo "VITE_GOOGLE_ADSENSE_SLOT_ID=${VITE_GOOGLE_ADSENSE_SLOT_ID}" >> .env.production; \
+          fi
+          echo "Generated .env.production with available variables"
 
       - name: Build
         run: npm run build

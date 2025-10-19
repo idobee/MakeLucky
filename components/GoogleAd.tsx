@@ -11,9 +11,10 @@ declare global {
 // 1. 당신의 애드센스 게시자 ID (ca-pub-XXXXXXXXXXXXXXXX)
 const AD_CLIENT = (import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_CLIENT_ID as string | undefined;
 // 2. 당신이 생성한 광고 단위의 슬롯 ID (숫자 10자리)
-const AD_SLOT = "6971312071";
+//    .env의 VITE_GOOGLE_ADSENSE_SLOT_ID로 설정할 수 있으며, 미설정 시 아래 기본값을 사용합니다.
+const AD_SLOT = ((import.meta as any)?.env?.VITE_GOOGLE_ADSENSE_SLOT_ID as string | undefined) || "6971312071";
 
-const IS_PLACEHOLDER = !AD_CLIENT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
+const IS_PLACEHOLDER = !AD_CLIENT || !AD_SLOT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
 
 const GoogleAd: React.FC = () => {
   useEffect(() => {
@@ -59,8 +60,8 @@ const GoogleAd: React.FC = () => {
         <ins
           className="adsbygoogle"
           style={{ display: 'block', width: '100%', height: '100%' }}
-          data-ad-client={AD_CLIENT}
-          data-ad-slot={AD_SLOT}
+          data-ad-client={AD_CLIENT as string}
+          data-ad-slot={AD_SLOT as string}
           data-ad-format="horizontal"
           data-full-width-responsive="true"
         ></ins>
