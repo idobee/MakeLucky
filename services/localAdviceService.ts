@@ -31,8 +31,9 @@ async function loadAdviceData(): Promise<AdviceData> {
   try {
       // Use Vite base-aware path so it works under GitHub Pages (e.g., /MakeLucky/)
       const base = (import.meta as any).env?.BASE_URL ?? '/';
-      // Prefer the asset under public/ (copied to dist root)
-      const url = `${base.replace(/\/$/, '/') }advice.json`;
+    // Normalize trailing slash and prefer the asset under public/ (copied to dist root)
+    const normalizedBase = typeof base === 'string' && base.endsWith('/') ? base : `${base}/`;
+    const url = `${normalizedBase}advice.json`;
       const response = await fetch(url, { cache: 'no-cache' });
     if (!response.ok) {
       throw new Error('Failed to load advice data');
