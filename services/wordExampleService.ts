@@ -1,3 +1,8 @@
+// Load word examples at build time to avoid runtime fetch/path issues (works on GitHub Pages)
+// Vite supports importing JSON as a module by default
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - typing JSON import via cast below
+import wordExamplesRaw from '../wordExamples.json';
 
 export interface PositiveExpression {
     bad: string;
@@ -20,21 +25,15 @@ export async function fetchWordExamples(): Promise<WordExamples> {
     if (cachedExamples) {
         return cachedExamples;
     }
-
     try {
-        const response = await fetch('/wordExamples.json');
-        if (!response.ok) {
-            throw new Error(`Failed to fetch wordExamples.json: ${response.statusText}`);
-        }
-        const data = await response.json();
+        const data = wordExamplesRaw as WordExamples;
         cachedExamples = {
-            goodWords: data.goodWords || [],
-            positiveExpressions: data.positiveExpressions || []
+            goodWords: Array.isArray((data as any).goodWords) ? (data as any).goodWords : [],
+            positiveExpressions: Array.isArray((data as any).positiveExpressions) ? (data as any).positiveExpressions : []
         };
         return cachedExamples;
     } catch (error) {
-        console.error("Error fetching or parsing word examples:", error);
-        // Return hardcoded fallbacks on error
+        console.error("Error loading word examples module:", error);
         return fallbackExamples;
     }
 }

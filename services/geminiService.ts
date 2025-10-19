@@ -1,4 +1,8 @@
-import { GoogleGenAI } from "@google/genai";
+// Load ads data at build time to avoid runtime fetch/path issues (works on GitHub Pages)
+// Vite supports importing JSON as a module by default
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - typing JSON import via cast below
+import adsDataRaw from '../ads.json';
 
 export interface AdItem {
   text: string;
@@ -8,28 +12,18 @@ export interface AdItem {
 // Cached ads
 let allAds: AdItem[] | null = null;
 
-async function fetchAndCacheAds(): Promise<void> {
-    if (allAds) return; // Return if ads are already cached.
+interface AdsData {
+  ads: AdItem[];
+}
 
-    try {
-        const response = await fetch('/ads.json'); // Fetch from local JSON file
-        if (!response.ok) {
-            throw new Error(`Failed to fetch ads.json: ${response.statusText}`);
-        }
-        const data = await response.json();
-        // Ensure data.ads is an array before assigning it
-        allAds = Array.isArray(data.ads) ? data.ads : [];
-    } catch (error) {
-        console.error("Error fetching or parsing ad data:", error);
-        allAds = []; // Set to empty on error to prevent refetching
-        throw error; // Re-throw the error to be handled by the caller
-    }
+function loadAdsFromModule(): AdItem[] {
+  if (allAds) return allAds;
+  const data = adsDataRaw as AdsData;
+  allAds = Array.isArray(data?.ads) ? data.ads : [];
+  return allAds;
 }
 
 export async function fetchAds(): Promise<AdItem[]> {
-    // This function ensures data is fetched only once per session.
-    if (allAds === null) {
-        await fetchAndCacheAds();
-    }
-    return allAds || [];
+    // Resolve synchronously from bundled JSON; keep async signature for callers
+    return loadAdsFromModule();
 }
