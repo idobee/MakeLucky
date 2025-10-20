@@ -1,0 +1,58 @@
+name: Deploy to Root GitHub Pages (idobee.github.io)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare .env.production (secrets or vars fallback)
+        run: |
+          CLIENT_ID="${{ secrets.VITE_GOOGLE_ADSENSE_CLIENT_ID }}"
+          if [ -z "$CLIENT_ID" ]; then CLIENT_ID="${{ vars.VITE_GOOGLE_ADSENSE_CLIENT_ID }}"; fi
+          SLOT_ID="${{ secrets.VITE_GOOGLE_ADSENSE_SLOT_ID }}"
+          if [ -z "$SLOT_ID" ]; then SLOT_ID="${{ vars.VITE_GOOGLE_ADSENSE_SLOT_ID }}"; fi
+          echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=$CLIENT_ID" >> .env.production
+          echo "VITE_GOOGLE_ADSENSE_SLOT_ID=$SLOT_ID" >> .env.production
+          # Debug presence only (do not print secrets)
+          if [ -n "$CLIENT_ID" ]; then echo "CLIENT_ID: present"; else echo "CLIENT_ID: MISSING"; fi
+          if [ -n "$SLOT_ID" ]; then echo "SLOT_ID: present"; else echo "SLOT_ID: MISSING"; fi
+
+      - name: Build for root site (base=/)
+        run: |
+          npm run -s build --silent --if-present
+          # Override Vite base for root deployment
+          ./node_modules/.bin/vite build --base=/
+
+      - name: Add SPA fallback (404.html) and .nojekyll
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+
+      - name: Deploy to idobee/idobee.github.io (main)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.GH_PAGES_TOKEN }}
+          external_repository: idobee/idobee.github.io
+          publish_branch: main
+          publish_dir: ./dist
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "Deploy MakeLucky to root site: ${{ github.sha }}"
