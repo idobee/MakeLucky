@@ -4,15 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       external_repository:
-        description: 'External repo to publish (owner/repo)'
+        description: External repo to publish (owner/repo)
         required: false
-        default: 'idobee/idobee.github.io'
+        default: idobee/idobee.github.io
       publish_branch:
-        description: 'Branch to publish to (main or master)'
+        description: Branch to publish to (main or master)
         required: false
-        default: 'main'
-  push:
-    branches: [ master ]
+        default: main
 
 permissions:
   contents: read
@@ -32,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Prepare .env.production (secrets or vars fallback)
+      - name: Prepare .env.production (Secrets/Variables fallback)
         run: |
           CLIENT_ID="${{ secrets.VITE_GOOGLE_ADSENSE_CLIENT_ID }}"
           if [ -z "$CLIENT_ID" ]; then CLIENT_ID="${{ vars.VITE_GOOGLE_ADSENSE_CLIENT_ID }}"; fi
@@ -44,7 +42,7 @@ jobs:
           if [ -n "$CLIENT_ID" ]; then echo "CLIENT_ID: present"; else echo "CLIENT_ID: MISSING"; fi
           if [ -n "$SLOT_ID" ]; then echo "SLOT_ID: present"; else echo "SLOT_ID: MISSING"; fi
 
-      - name: Check external repository exists and permissions
+      - name: Check external repository exists and PAT permissions
         env:
           GH_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
           EXTERNAL_REPO: ${{ inputs.external_repository }}
