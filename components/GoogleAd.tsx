@@ -17,7 +17,7 @@ const AD_SLOT: string = (import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_ID as any) || 
 
 const IS_PLACEHOLDER = !AD_CLIENT || !AD_SLOT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
 
-const GoogleAd: React.FC = () => {
+const GoogleAd = () => {
   useEffect(() => {
     if (IS_PLACEHOLDER) {
       // 개발자 콘솔에 상세 가이드 노출
@@ -31,15 +31,16 @@ const GoogleAd: React.FC = () => {
       return;
     }
 
-    // Inject AdSense script once
-    const existing = document.querySelector('script[data-origin="adsense"]') as HTMLScriptElement | null;
+    // Inject AdSense script once (detect by src)
+    const existing = document.querySelector(
+      'script[src^="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
+    ) as HTMLScriptElement | null;
     if (!existing) {
       const s = document.createElement('script');
       s.async = true;
       s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(
         AD_CLIENT as string
       )}`;
-      s.setAttribute('data-origin', 'adsense');
       s.crossOrigin = 'anonymous';
       document.head.appendChild(s);
     }

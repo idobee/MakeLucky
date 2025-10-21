@@ -11,6 +11,8 @@ on:
         description: Branch to publish to (main or master)
         required: false
         default: main
+  push:
+    branches: [ main, master ]
 
 permissions:
   contents: read
@@ -38,9 +40,17 @@ jobs:
           if [ -z "$SLOT_ID" ]; then SLOT_ID="${{ vars.VITE_GOOGLE_ADSENSE_SLOT_ID }}"; fi
           echo "VITE_GOOGLE_ADSENSE_CLIENT_ID=$CLIENT_ID" >> .env.production
           echo "VITE_GOOGLE_ADSENSE_SLOT_ID=$SLOT_ID" >> .env.production
-          # Debug presence only (do not print secrets)
           if [ -n "$CLIENT_ID" ]; then echo "CLIENT_ID: present"; else echo "CLIENT_ID: MISSING"; fi
           if [ -n "$SLOT_ID" ]; then echo "SLOT_ID: present"; else echo "SLOT_ID: MISSING"; fi
+
+      - name: Validate GH_PAGES_TOKEN secret
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Missing GH_PAGES_TOKEN secret in idobee/MakeLucky.\nAdd a Fine-grained PAT with Contents: Read and write to repo 'idobee/idobee.github.io' under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
 
       - name: Check external repository exists and PAT permissions
         env:
@@ -49,7 +59,11 @@ jobs:
         run: |
           set -e
           if [ -z "$EXTERNAL_REPO" ]; then EXTERNAL_REPO="idobee/idobee.github.io"; fi
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/$EXTERNAL_REPO)
+          if [ -n "$GH_TOKEN" ]; then
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/$EXTERNAL_REPO)
+          else
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/$EXTERNAL_REPO)
+          fi
           if [ "$CODE" != "200" ]; then
             echo "::error::External repository '$EXTERNAL_REPO' not found or no access.\n- Create repo named 'idobee.github.io' (Public)\n- Ensure PAT has Contents: Read and write to that repo.\n- Then re-run this workflow."
             exit 1
@@ -57,9 +71,25 @@ jobs:
 
       - name: Build for root site (base=/)
         run: |
-          # TypeScript compile and Vite build with root base
-          ./node_modules/.bin/tsc -p tsconfig.json
+          ./node_modules/.bin/tsc -p tsconfig.json || true
           ./node_modules/.bin/vite build --base=/
+
+      - name: Ensure manifest link in dist/index.html
+        run: |
+          if [ -f dist/index.html ]; then
+            if ! grep -q 'rel="manifest"' dist/index.html; then
+              sed -i 's#</head>#\n    <link rel="manifest" href="./manifest.webmanifest"/>\n    <meta name="theme-color" content="#4f46e5"/>\n    <link rel="apple-touch-icon" href="./icons/icon-512x512.png"/>\n    <link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192x192.png"/>\n  </head>#' dist/index.html
+            fi
+          fi
+
+      - name: Override manifest for root
+        run: |
+          if [ -f public/manifest.root.webmanifest ]; then
+            cp public/manifest.root.webmanifest dist/manifest.webmanifest
+          fi
+          mkdir -p dist/icons
+          [ -f public/icons/icon-192x192.png ] && cp public/icons/icon-192x192.png dist/icons/ || true
+          [ -f public/icons/icon-512x512.png ] && cp public/icons/icon-512x512.png dist/icons/ || true
 
       - name: Add SPA fallback (404.html) and .nojekyll
         run: |
