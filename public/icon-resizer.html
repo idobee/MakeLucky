@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>아이콘 리사이저 (512·192)</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+      .drop { border: 2px dashed #94a3b8; padding: 2rem; border-radius: 12px; text-align: center; color: #475569; }
+      .row { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+      .card { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 10px; width: 320px; }
+      canvas { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; display: block; max-width: 100%; }
+      button { padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #475569; background: #0ea5e9; color: white; font-weight: 600; }
+      .hint { color: #64748b; font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <h1>아이콘 리사이저</h1>
+    <p class="hint">아래 영역에 제공받은 512×512 이미지를 드래그-앤-드롭하거나 파일을 선택하세요. 512×512, 192×192 PNG를 만들어 다운로드할 수 있습니다.</p>
+    <div id="drop" class="drop">
+      <p>여기에 이미지를 드롭하거나…</p>
+      <input type="file" id="file" accept="image/*" />
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h3>512 × 512</h3>
+        <canvas id="c512" width="512" height="512"></canvas>
+        <div style="margin-top: 0.5rem">
+          <button id="d512" disabled>makelucky-512.png 다운로드</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>192 × 192</h3>
+        <canvas id="c192" width="192" height="192"></canvas>
+        <div style="margin-top: 0.5rem">
+          <button id="d192" disabled>makelucky-192.png 다운로드</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin-top: 1rem">다운로드한 파일을 프로젝트의 <code>public/icons</code> 폴더에 각각 <code>makelucky-512.png</code>, <code>makelucky-192.png</code> 이름으로 저장하세요.</p>
+
+    <script>
+      const drop = document.getElementById('drop');
+      const input = document.getElementById('file');
+      const c512 = document.getElementById('c512');
+      const c192 = document.getElementById('c192');
+      const ctx512 = c512.getContext('2d');
+      const ctx192 = c192.getContext('2d');
+      const d512 = document.getElementById('d512');
+      const d192 = document.getElementById('d192');
+
+      function preventDefaults(e){ e.preventDefault(); e.stopPropagation(); }
+      ['dragenter','dragover','dragleave','drop'].forEach(ev => drop.addEventListener(ev, preventDefaults));
+      drop.addEventListener('drop', (e)=>{
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if(file) handleFile(file);
+      });
+      input.addEventListener('change', (e)=>{
+        const file = e.target.files && e.target.files[0];
+        if(file) handleFile(file);
+      });
+
+      function handleFile(file){
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = ()=>{
+          // draw centered contain fit
+          drawContain(ctx512, img, 512, 512);
+          drawContain(ctx192, img, 192, 192);
+          d512.disabled = false; d192.disabled = false;
+        };
+        img.src = url;
+      }
+
+      function drawContain(ctx, img, W, H){
+        ctx.clearRect(0,0,W,H);
+        // fill background as transparent; if you want a color, set it here.
+        const imgRatio = img.width / img.height;
+        const canvasRatio = W / H;
+        let w, h;
+        if(imgRatio > canvasRatio){
+          // image is wider
+          w = W; h = W / imgRatio;
+        } else {
+          h = H; w = H * imgRatio;
+        }
+        const x = (W - w) / 2; const y = (H - h) / 2;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, x, y, w, h);
+      }
+
+      d512.addEventListener('click', ()=> downloadCanvas(c512, 'makelucky-512.png'));
+      d192.addEventListener('click', ()=> downloadCanvas(c192, 'makelucky-192.png'));
+      function downloadCanvas(canvas, filename){
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = filename;
+        a.click();
+      }
+    </script>
+  </body>
+  </html>
