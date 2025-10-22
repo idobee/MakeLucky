@@ -136,7 +136,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.GH_PAGES_TOKEN }}
-          external_repository: ${{ inputs.external_repository }}
+          external_repository: ${{ inputs.external_repository || 'idobee/idobee.github.io' }}
           publish_branch: ${{ steps.repo-info.outputs.default_branch }}
           publish_dir: ./dist
           user_name: github-actions[bot]
