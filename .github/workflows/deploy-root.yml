@@ -69,6 +69,24 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve external default branch
+        id: ext
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
+          EXTERNAL_REPO: ${{ inputs.external_repository }}
+        run: |
+          set -e
+          if [ -z "$EXTERNAL_REPO" ]; then EXTERNAL_REPO="idobee/idobee.github.io"; fi
+          if [ -n "$GH_TOKEN" ]; then
+            JSON=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/$EXTERNAL_REPO)
+          else
+            JSON=$(curl -s https://api.github.com/repos/$EXTERNAL_REPO)
+          fi
+          DEF=$(echo "$JSON" | sed -n 's/.*"default_branch"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)
+          if [ -z "$DEF" ]; then DEF="main"; fi
+          echo "Default branch resolved: $DEF"
+          echo "default_branch=$DEF" >> $GITHUB_OUTPUT
+
       - name: Build for root site (base=/)
         run: |
           ./node_modules/.bin/tsc -p tsconfig.json || true
@@ -101,7 +119,7 @@ jobs:
         with:
           personal_token: ${{ secrets.GH_PAGES_TOKEN }}
           external_repository: ${{ inputs.external_repository }}
-          publish_branch: ${{ inputs.publish_branch }}
+          publish_branch: ${{ steps.ext.outputs.default_branch }}
           publish_dir: ./dist
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
