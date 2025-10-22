@@ -69,6 +69,24 @@ jobs:
             exit 1
           fi
 
+      - name: Determine external repo default branch
+        id: repo-info
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
+          EXTERNAL_REPO: ${{ inputs.external_repository }}
+        run: |
+          set -e
+          if [ -z "$EXTERNAL_REPO" ]; then EXTERNAL_REPO="idobee/idobee.github.io"; fi
+          if [ -n "$GH_TOKEN" ]; then
+            RESP=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/$EXTERNAL_REPO)
+          else
+            RESP=$(curl -s https://api.github.com/repos/$EXTERNAL_REPO)
+          fi
+          DEFAULT_BRANCH=$(printf "%s" "$RESP" | awk -F '"' '/"default_branch"/ {print $4; exit}')
+          if [ -z "$DEFAULT_BRANCH" ]; then DEFAULT_BRANCH="main"; fi
+          echo "default_branch=$DEFAULT_BRANCH" >> $GITHUB_OUTPUT
+          echo "Default branch detected: $DEFAULT_BRANCH"
+
       - name: Resolve external default branch
         id: ext
         env:
@@ -119,7 +137,7 @@ jobs:
         with:
           personal_token: ${{ secrets.GH_PAGES_TOKEN }}
           external_repository: ${{ inputs.external_repository }}
-          publish_branch: ${{ steps.ext.outputs.default_branch }}
+          publish_branch: ${{ steps.repo-info.outputs.default_branch }}
           publish_dir: ./dist
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
