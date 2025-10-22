@@ -78,7 +78,7 @@ jobs:
         run: |
           if [ -f dist/index.html ]; then
             if ! grep -q 'rel="manifest"' dist/index.html; then
-              sed -i 's#</head>#\n    <link rel="manifest" href="./manifest.webmanifest"/>\n    <meta name="theme-color" content="#4f46e5"/>\n    <link rel="apple-touch-icon" href="./icons/icon-512x512.png"/>\n    <link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192x192.png"/>\n  </head>#' dist/index.html
+              sed -i 's#</head>#\n    <link rel=\"manifest\" href=\"/manifest.webmanifest\"/>\n    <meta name=\"theme-color\" content=\"#4f46e5\"/>\n    <link rel=\"apple-touch-icon\" href=\"/icons/icon-512x512.png\"/>\n    <link rel=\"apple-touch-icon\" sizes=\"192x192\" href=\"/icons/icon-192x192.png\"/>\n  </head>#' dist/index.html
             fi
           fi
 
@@ -106,3 +106,13 @@ jobs:
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
           commit_message: "Deploy MakeLucky to root site: ${{ github.sha }} (repo=${{ inputs.external_repository }}, branch=${{ inputs.publish_branch }})"
+
+      - name: Post-deploy verification (manifest and icons)
+        if: always()
+        run: |
+          URL_MANIFEST="https://idobee.github.io/manifest.webmanifest"
+          URL_ICON192="https://idobee.github.io/icons/icon-192x192.png"
+          URL_ICON512="https://idobee.github.io/icons/icon-512x512.png"
+          echo "Checking: $URL_MANIFEST" && curl -s -I "$URL_MANIFEST" | head -n 20 || true
+          echo "Checking: $URL_ICON192" && curl -s -I "$URL_ICON192" | head -n 20 || true
+          echo "Checking: $URL_ICON512" && curl -s -I "$URL_ICON512" | head -n 20 || true
