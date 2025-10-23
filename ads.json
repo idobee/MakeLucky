@@ -1,10 +1,10 @@
 
 {
   "ads": [
-    { "생생현미칩": "✨ 내몸에 선물하는 안심 간식 하나 !", "link": "https://www.coupang.com/vp/products/8620646741?vendorItemId=91510279657" },
-    { "AI스토리북": "🍀 알고 먹는 한끼에 대한 AI 동화!", "link": "https://www.youtube.com/playlist?list=PLDSEX5lxLNzSrkCiEqwKz_cmCybm_uw8d" },
-    { "생생양파현미칩": "🧘‍♀️ 와인안주로 짱!  양파 현미칩.", "link": "https://www.coupang.com/vp/products/8106934465?vendorItemId=93138420716" },
-    { "생생비트현미칩": "💖 대지의 보혈! 생생 비트 현미칩.", "link": "https://www.coupang.com/vp/products/5795151302?vendorItemId=93138435038" },
-     { "디톡스 제안": "🍀 사소한 습관으로 내몸을 디톡스하세요.", "link": "https://www.idobe.asia/company.html" }
+    { "text": "생생현미칩 ✨ 내몸에 선물하는 안심 간식 하나 !", "link": "https://www.coupang.com/vp/products/8620646741?vendorItemId=91510279657" },
+    { "text": "AI스토리북 🍀 알고 먹는 한끼에 대한 AI 동화!", "link": "https://www.youtube.com/playlist?list=PLDSEX5lxLNzSrkCiEqwKz_cmCybm_uw8d" },
+    { "text": "생생양파현미칩 🧘‍♀️ 와인안주로 짱!  양파 현미칩.", "link": "https://www.coupang.com/vp/products/8106934465?vendorItemId=93138420716" },
+    { "text": "생생비트현미칩 💖 대지의 보혈! 생생 비트 현미칩.", "link": "https://www.coupang.com/vp/products/5795151302?vendorItemId=93138435038" },
+     { "text": "디톡스 제안 🍀 사소한 습관으로 내몸을 디톡스하세요.", "link": "https://www.idobe.asia/company.html" }
   ]
 }
