@@ -11,6 +11,13 @@ declare global {
 // 반드시 import.meta.env.VITE_* 형태로 접근해야 Vite가 빌드 시 정적으로 치환합니다.
 // 로컬 개발: .env.local에 VITE_GOOGLE_ADSENSE_CLIENT_ID, VITE_GOOGLE_ADSENSE_SLOT_ID 설정
 // GitHub Pages: Repo Settings → Secrets and variables → Actions → Variables 에 동일 키로 설정
+// 섹션 표시 플래그: VITE_GOOGLE_ADSENSE_FLAG=TRUE 일 때에만 광고 섹션 노출
+const ENABLE_ADS: boolean = String(
+  (import.meta.env as any).VITE_GOOGLE_ADSENSE_FLAG || ''
+)
+  .toString()
+  .trim()
+  .toUpperCase() === 'TRUE';
 const AD_CLIENT: string | undefined = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID as any;
 // 슬롯 ID는 선택사항이지만, 실제 광고 노출을 위해 본인 슬롯을 설정하는 것을 권장합니다.
 const AD_SLOT: string = (import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_ID as any) || "6971312071";
@@ -18,6 +25,8 @@ const AD_SLOT: string = (import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_ID as any) || 
 const IS_PLACEHOLDER = !AD_CLIENT || !AD_SLOT || AD_CLIENT.startsWith("ca-pub-000") || AD_SLOT.startsWith("000");
 
 const GoogleAd = () => {
+  // 플래그가 TRUE가 아니면 아무것도 렌더링하지 않습니다.
+  if (!ENABLE_ADS) return null;
   useEffect(() => {
     if (IS_PLACEHOLDER) {
       // 개발자 콘솔에 상세 가이드 노출

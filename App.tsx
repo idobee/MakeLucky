@@ -17,7 +17,7 @@ import {
   HomeIcon
 } from './components/Icons';
 // FIX: Import the `AdItem` type to resolve the 'Cannot find name' error.
-import { fetchAds, type AdItem } from './services/geminiService';
+// Ads for RollingAdBanner are now self-loaded from JSON inside the component
 import { fetchWordExamples, PositiveExpression, WordExamples } from './services/wordExampleService';
 import GoogleAd from './components/GoogleAd';
 import RollingAdBanner from './components/RollingAdBanner';
@@ -97,7 +97,6 @@ function App() {
   const [showPositiveExpressionExamples, setShowPositiveExpressionExamples] = useState(false);
   const [goodWordText, setGoodWordText] = useState('');
   const [badWordText, setBadWordText] = useState('');
-  const [adItems, setAdItems] = useState<AdItem[]>([]);
   const [wordExamples, setWordExamples] = useState<WordExamples>({ goodWords: [], positiveExpressions: [] });
 
   useEffect(() => {
@@ -110,18 +109,6 @@ function App() {
 
   useEffect(() => {
     const loadData = async () => {
-      // Load Ads
-      try {
-        const fetchedAds = await fetchAds();
-        setAdItems(fetchedAds);
-      } catch (error) {
-        console.warn("Failed to load ads from JSON, using fallback.", error);
-        setAdItems([
-            { text: "✨ 긍정 확언 노트로 매일 행운을 기록하세요!", link: "https://example.com" },
-            { text: "🍀 오늘의 운세 확인하고 하루를 준비하세요!", link: "https://example.com" },
-        ]);
-      }
-
       // Load Word Examples
       const examples = await fetchWordExamples();
       setWordExamples(examples);
@@ -412,14 +399,31 @@ function App() {
         </div>
       </main>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col md:flex-row gap-4">
-            <div className="w-full md:w-[30%]">
-                <RollingAdBanner adItems={adItems} />
+        {(() => {
+          const ADS_ENABLED = String((import.meta as any).env?.VITE_GOOGLE_ADSENSE_FLAG || '')
+            .toString()
+            .trim()
+            .toUpperCase() === 'TRUE';
+          if (ADS_ENABLED) {
+            return (
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="w-full md:w-[30%]">
+                  <RollingAdBanner />
+                </div>
+                <div className="w-full md:w-[70%]">
+                  <GoogleAd />
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div className="flex flex-col gap-4">
+              <div className="w-full">
+                <RollingAdBanner />
+              </div>
             </div>
-            <div className="w-full md:w-[70%]">
-                <GoogleAd />
-            </div>
-        </div>
+          );
+        })()}
       </div>
       <footer className="text-center py-6 text-slate-500 text-sm">
         <p>&copy; 2025 AI 행운습관 코치. All rights reserved.</p>

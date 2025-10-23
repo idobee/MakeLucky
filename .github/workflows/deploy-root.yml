@@ -113,9 +113,15 @@ jobs:
       - name: Ensure manifest link in dist/index.html
         run: |
           if [ -f dist/index.html ]; then
-            if ! grep -q 'rel="manifest"' dist/index.html; then
+            # If no manifest link, insert one
+            if ! grep -q 'rel=\"manifest\"' dist/index.html; then
               sed -i 's|</head>|\n    <link rel="manifest" href="/manifest.webmanifest"/>\n    <meta name="theme-color" content="#4f46e5"/>\n    <link rel="apple-touch-icon" href="/icons/icon-512x512.png"/>\n    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png"/>\n  </head>|' dist/index.html
             fi
+            # Normalize any existing manifest link to absolute root path
+            sed -i -E 's|<link\s+rel="manifest"\s+href="[^"]*manifest\.webmanifest"|<link rel="manifest" href="/manifest.webmanifest"|g' dist/index.html
+            # Normalize apple-touch-icon links to absolute root paths
+            sed -i -E 's|<link\s+rel="apple-touch-icon"(\s+sizes="[^"]*")?\s+href="[^"]*icon-512x512\.png"|<link rel="apple-touch-icon" href="/icons/icon-512x512.png"|g' dist/index.html
+            sed -i -E 's|<link\s+rel="apple-touch-icon"\s+sizes="192x192"\s+href="[^"]*icon-192x192\.png"|<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png"|g' dist/index.html
           fi
 
       - name: Override manifest for root
