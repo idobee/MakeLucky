@@ -42,5 +42,97 @@
   <body>
     <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
+  <!-- ✅ PWA 설치 및 Safari 안내 배너 -->
+<style>
+  #pwaInstallBanner {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(30, 30, 30, 0.95);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 15px;
+    z-index: 9999;
+    text-align: center;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
+  }
+  #pwaInstallBanner button {
+    background: #007aff;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-left: 8px;
+    font-size: 14px;
+  }
+</style>
+
+<div id="pwaInstallBanner">
+  <!-- 내용은 자바스크립트에서 동적으로 변경됩니다 -->
+</div>
+
+<script>
+(function() {
+  const banner = document.getElementById('pwaInstallBanner');
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const isInAppBrowser = /(KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line)/i.test(ua);
+
+  // ✅ PWA 설치 이벤트 감지 (안드로이드 전용)
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // iOS가 아니면 PWA 설치 배너 표시
+    if (!isIOS && !isInAppBrowser) {
+      banner.innerHTML = `
+        📱 앱처럼 사용하시겠어요?
+        <button id="installBtn">홈화면에 추가</button>
+      `;
+      banner.style.display = 'block';
+
+      document.getElementById('installBtn').addEventListener('click', async () => {
+        banner.style.display = 'none';
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          console.log('사용자가 PWA 설치를 수락함');
+        }
+      });
+    }
+  });
+
+  // ✅ iOS + 인앱브라우저 (카카오톡 등)일 때 Safari 안내 표시
+  if (isIOS && isInAppBrowser) {
+    banner.innerHTML = `
+      ⚠️ 아이폰에서는 Safari로 열어야 홈화면에 설치할 수 있습니다.
+      <button id="openSafariBtn">Safari로 열기</button>
+    `;
+    banner.style.display = 'block';
+
+    document.getElementById('openSafariBtn').addEventListener('click', () => {
+      const currentUrl = window.location.href;
+      alert('Safari에서 직접 열어주세요:\n\n' + currentUrl);
+    });
+  }
+
+  // ✅ iOS Safari에서는 설치 안내 (Add to Home Screen)
+  if (isIOS && !isInAppBrowser) {
+    banner.innerHTML = `
+      📲 홈화면에 앱처럼 추가하려면,
+      하단의 <strong>공유 아이콘(⬆️)</strong>을 누른 뒤
+      <strong>“홈 화면에 추가”</strong>를 선택하세요.
+    `;
+    banner.style.display = 'block';
+    setTimeout(() => banner.style.display = 'none', 20000);
+  }
+
+})();
+</script>
+
   </body>
 </html>
