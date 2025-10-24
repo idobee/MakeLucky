@@ -18,8 +18,16 @@ interface AdsData {
 
 function loadAdsFromModule(): AdItem[] {
   if (allAds) return allAds;
-  const data = adsDataRaw as AdsData;
-  allAds = Array.isArray(data?.ads) ? data.ads : [];
+  const data = adsDataRaw as unknown as AdsData;
+  const raw = Array.isArray(data?.ads) ? data.ads : [];
+  // Sanitize entries to avoid runtime issues if JSON is edited freely
+  allAds = raw
+    .filter((it: any) => it && typeof it.text === 'string')
+    .map((it: any) => ({
+      text: String(it.text).trim(),
+      link: typeof it.link === 'string' && it.link.trim() ? String(it.link).trim() : '#',
+    }))
+    .filter((it) => it.text.length > 0);
   return allAds;
 }
 

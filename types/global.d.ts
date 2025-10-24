@@ -50,4 +50,7 @@ declare namespace React {
     (props: P & { children?: ReactNode }): any;
   }
   type FC<P = {}> = FunctionComponent<P>;
+  // Minimal placeholder to satisfy usages like React.SVGProps<SVGSVGElement>
+  // If @types/react is added, this will be superseded by proper typings.
+  type SVGProps<T> = any;
 }
