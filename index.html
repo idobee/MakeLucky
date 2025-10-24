@@ -113,6 +113,14 @@
   // 설치 완료되면 배너 숨김
   window.addEventListener('appinstalled', () => {
     banner.style.display = 'none';
+    // 총 설치수 카운트(안드로이드 등 appinstalled 지원)
+    try {
+      const counted = localStorage.getItem('makelucky-install-counted') === '1';
+      if (!counted) {
+        fetch('https://api.countapi.xyz/hit/idobee.github.io/root-installs').catch(()=>{});
+        localStorage.setItem('makelucky-install-counted', '1');
+      }
+    } catch (e) { /* ignore */ }
   });
 
   // ✅ iOS + 인앱브라우저 (카카오톡 등)일 때 Safari 안내 표시
@@ -153,6 +161,20 @@
       });
     });
   }
+
+  // ✅ iOS 등 appinstalled 이벤트가 없는 환경: 독립실행(standalone) 첫 실행 시 설치수 증가
+  (function() {
+    try {
+      const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      if (isStandalone) {
+        const counted = localStorage.getItem('makelucky-install-counted') === '1';
+        if (!counted) {
+          fetch('https://api.countapi.xyz/hit/idobee.github.io/root-installs').catch(()=>{});
+          localStorage.setItem('makelucky-install-counted', '1');
+        }
+      }
+    } catch (e) { /* ignore */ }
+  })();
   </script>
 
   </body>

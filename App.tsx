@@ -22,6 +22,7 @@ import { fetchWordExamples, PositiveExpression, WordExamples } from './services/
 import GoogleAd from './components/GoogleAd';
 import RollingAdBanner from './components/RollingAdBanner';
 import VisitorCounter from './components/VisitorCounter';
+import InstallCounter from './components/InstallCounter';
 
 const toYYYYMMDD = (date: Date): string => {
   return date.toISOString().split('T')[0];
@@ -427,9 +428,11 @@ function App() {
         })()}
       </div>
       <footer className="text-center py-6 text-slate-500 text-sm">
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 flex-wrap">
           <p>&copy; 2025 AI 행운습관 코치. All rights reserved.</p>
           <VisitorCounter />
+          <span className="text-slate-300">•</span>
+          <InstallCounter />
         </div>
       </footer>
     </div>
