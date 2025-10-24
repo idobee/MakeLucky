@@ -21,6 +21,7 @@ import {
 import { fetchWordExamples, PositiveExpression, WordExamples } from './services/wordExampleService';
 import GoogleAd from './components/GoogleAd';
 import RollingAdBanner from './components/RollingAdBanner';
+import VisitorCounter from './components/VisitorCounter';
 
 const toYYYYMMDD = (date: Date): string => {
   return date.toISOString().split('T')[0];
@@ -426,7 +427,10 @@ function App() {
         })()}
       </div>
       <footer className="text-center py-6 text-slate-500 text-sm">
-        <p>&copy; 2025 AI 행운습관 코치. All rights reserved.</p>
+        <div className="flex items-center justify-center gap-4">
+          <p>&copy; 2025 AI 행운습관 코치. All rights reserved.</p>
+          <VisitorCounter />
+        </div>
       </footer>
     </div>
   );
