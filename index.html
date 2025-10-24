@@ -82,6 +82,10 @@
   const isAndroid = /Android/i.test(ua);
   const isInAppBrowser = /(KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line)/i.test(ua);
 
+  // 이미 설치(standalone) 상태면 배너를 표시하지 않음
+  const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  if (isStandalone) return;
+
   // ✅ PWA 설치 이벤트 감지 (안드로이드 전용)
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -104,6 +108,11 @@
         }
       });
     }
+  });
+
+  // 설치 완료되면 배너 숨김
+  window.addEventListener('appinstalled', () => {
+    banner.style.display = 'none';
   });
 
   // ✅ iOS + 인앱브라우저 (카카오톡 등)일 때 Safari 안내 표시
@@ -133,6 +142,18 @@
 
 })();
 </script>
+
+<!-- ✅ Service Worker 등록 (PWA installability 보장) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // 상대 경로로 등록: /MakeLucky/ 및 루트 모두에서 정상 동작
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('Service Worker registration failed', err);
+      });
+    });
+  }
+  </script>
 
   </body>
 </html>
