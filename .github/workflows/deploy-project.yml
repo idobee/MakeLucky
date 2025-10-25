@@ -47,6 +47,13 @@ jobs:
           if [ -n "$CLIENT_ID" ]; then echo "CLIENT_ID: present"; else echo "CLIENT_ID: MISSING"; fi
           if [ -n "$SLOT_ID" ]; then echo "SLOT_ID: present"; else echo "SLOT_ID: MISSING"; fi
 
+      - name: Prepare metrics env (Worker base)
+        run: |
+          METRICS_BASE="${{ secrets.VITE_METRICS_API_BASE }}"
+          if [ -z "$METRICS_BASE" ]; then METRICS_BASE="${{ vars.VITE_METRICS_API_BASE }}"; fi
+          if [ -n "$METRICS_BASE" ]; then echo "VITE_METRICS_API_BASE=$METRICS_BASE" >> .env.production; fi
+          if [ -n "$METRICS_BASE" ]; then echo "METRICS_BASE: present"; else echo "METRICS_BASE: MISSING (fallback to CountAPI)"; fi
+
       - name: Build with Vite (base=/MakeLucky/)
         run: |
           if [ -f node_modules/.bin/vite ]; then

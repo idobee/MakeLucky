@@ -32,6 +32,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Prepare metrics env (Worker base)
+        run: |
+          METRICS_BASE="${{ secrets.VITE_METRICS_API_BASE }}"
+          if [ -z "$METRICS_BASE" ]; then METRICS_BASE="${{ vars.VITE_METRICS_API_BASE }}"; fi
+          if [ -n "$METRICS_BASE" ]; then echo "VITE_METRICS_API_BASE=$METRICS_BASE" >> .env.production; fi
+          if [ -n "$METRICS_BASE" ]; then echo "METRICS_BASE: present"; else echo "METRICS_BASE: MISSING (fallback to CountAPI)"; fi
+
       - name: Prepare .env.production (Secrets/Variables fallback)
         run: |
           CLIENT_ID="${{ secrets.VITE_GOOGLE_ADSENSE_CLIENT_ID }}"
