@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Square+Neo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Metrics API base is set by index.tsx via import.meta.env.VITE_METRICS_API_BASE -->
     <style>
       body {
         font-family: 'Nanum Square Neo', sans-serif;
@@ -42,6 +43,7 @@
   <body>
     <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
+  <script type="module" src="./bootstrap.ts"></script>
   <!-- ✅ PWA 설치 및 Safari 안내 배너 -->
 <style>
   #pwaInstallBanner {
@@ -114,13 +116,7 @@
   window.addEventListener('appinstalled', () => {
     banner.style.display = 'none';
     // 총 설치수 카운트(안드로이드 등 appinstalled 지원)
-    try {
-      const counted = localStorage.getItem('makelucky-install-counted') === '1';
-      if (!counted) {
-        fetch('https://api.countapi.xyz/hit/idobee.github.io/root-installs').catch(()=>{});
-        localStorage.setItem('makelucky-install-counted', '1');
-      }
-    } catch (e) { /* ignore */ }
+    try { window.MAKE_LUCKY && window.MAKE_LUCKY.hitInstallOnce(); } catch (e) {}
   });
 
   // ✅ iOS + 인앱브라우저 (카카오톡 등)일 때 Safari 안내 표시
@@ -167,11 +163,7 @@
     try {
       const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
       if (isStandalone) {
-        const counted = localStorage.getItem('makelucky-install-counted') === '1';
-        if (!counted) {
-          fetch('https://api.countapi.xyz/hit/idobee.github.io/root-installs').catch(()=>{});
-          localStorage.setItem('makelucky-install-counted', '1');
-        }
+        try { window.MAKE_LUCKY && window.MAKE_LUCKY.hitInstallOnce(); } catch (e) {}
       }
     } catch (e) { /* ignore */ }
   })();

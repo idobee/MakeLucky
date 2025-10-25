@@ -18,7 +18,31 @@ const VisitorCounter: React.FC = () => {
     let cancelled = false;
     const run = async () => {
       try {
-        // Try to read current count first
+        const METRICS_BASE = String((import.meta as any).env?.VITE_METRICS_API_BASE || '').trim();
+
+        // Prefer Worker API if configured
+        if (METRICS_BASE) {
+          // Read current value
+          const getRes = await fetch(`${METRICS_BASE}/api/visitors`, { headers: { 'Cache-Control': 'no-cache' } });
+          if (!getRes.ok) throw new Error('metrics get failed');
+          const getJson = await getRes.json();
+          if (!cancelled && typeof getJson?.value === 'number') setCount(getJson.value);
+
+          // Increment once per device/browser
+          let alreadySent = false;
+          try { alreadySent = localStorage.getItem(storageKey) === '1'; } catch {}
+          if (!alreadySent) {
+            const hitRes = await fetch(`${METRICS_BASE}/api/visitors/hit`, { method: 'POST' });
+            if (hitRes.ok) {
+              const hitJson = await hitRes.json();
+              if (!cancelled && typeof hitJson?.value === 'number') setCount(hitJson.value);
+              try { localStorage.setItem(storageKey, '1'); } catch {}
+            }
+          }
+          return; // done
+        }
+
+        // Fallback to CountAPI
         const getRes = await fetch(`${COUNTAPI_BASE}/get/${encodeURIComponent(NAMESPACE)}/${encodeURIComponent(KEY)}`);
         if (!getRes.ok) throw new Error('countapi get failed');
         const getJson = await getRes.json();
@@ -40,11 +64,7 @@ const VisitorCounter: React.FC = () => {
             if (!cancelled && typeof hitJson?.value === 'number') {
               setCount(hitJson.value);
             }
-            try {
-              localStorage.setItem(storageKey, '1');
-            } catch (_) {
-              // ignore
-            }
+            try { localStorage.setItem(storageKey, '1'); } catch {}
           }
         }
       } catch (e) {

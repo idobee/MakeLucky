@@ -20,6 +20,7 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_ADSENSE_FLAG?: string;
   readonly VITE_ROLLING_INTERVAL_MS?: string;
   readonly VITE_ROLLING_FADE_MS?: string;
+  readonly VITE_METRICS_API_BASE?: string;
 }
 
 interface ImportMeta {

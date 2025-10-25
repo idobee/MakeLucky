@@ -12,6 +12,15 @@ const InstallCounter: React.FC = () => {
     let cancelled = false;
     const run = async () => {
       try {
+        const METRICS_BASE = String((import.meta as any).env?.VITE_METRICS_API_BASE || '').trim();
+        if (METRICS_BASE) {
+          const res = await fetch(`${METRICS_BASE}/api/installs`, { headers: { 'Cache-Control': 'no-cache' } });
+          if (!res.ok) throw new Error('metrics get failed');
+          const json = await res.json();
+          if (!cancelled && typeof json?.value === 'number') setCount(json.value);
+          return;
+        }
+        // Fallback to CountAPI if no metrics base configured
         const res = await fetch(`${COUNTAPI_BASE}/get/${encodeURIComponent(NAMESPACE)}/${encodeURIComponent(KEY)}`);
         if (!res.ok) throw new Error('countapi get failed');
         const json = await res.json();
