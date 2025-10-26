@@ -1,0 +1,113 @@
+name: Publish GitHub traffic to traffic.json
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every day at 01:10 UTC (adjust as desired)
+    - cron: '10 1 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check jq availability
+        run: jq --version
+
+      - name: Prepare traffic data
+        env:
+          GH_PAT: ${{ secrets.GH_PAGES_TOKEN }}
+          ROOT_REPO: idobee/idobee.github.io
+          PROJ_REPO: idobee/MakeLucky
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_PAT:-}" ]; then
+            echo "GH_PAGES_TOKEN is not set. Create a classic PAT with 'repo' scope on your account, store it as GH_PAGES_TOKEN secret, and rerun." >&2
+            exit 1
+          fi
+
+          # Determine default branch of the root repo so we commit to the right branch
+          default_branch=$(curl -sS -H "Authorization: token ${GH_PAT}" https://api.github.com/repos/${ROOT_REPO} | jq -r .default_branch)
+          if [ -z "$default_branch" ] || [ "$default_branch" = "null" ]; then
+            echo "Failed to get default branch for ${ROOT_REPO}" >&2
+            exit 1
+          fi
+          echo "DEFAULT_BRANCH=$default_branch" >> "$GITHUB_ENV"
+
+          # Fetch last 14d traffic for both repos
+          root_json=$(curl -sS -H "Authorization: token ${GH_PAT}" https://api.github.com/repos/${ROOT_REPO}/traffic/views)
+          proj_json=$(curl -sS -H "Authorization: token ${GH_PAT}" https://api.github.com/repos/${PROJ_REPO}/traffic/views)
+
+          # Validate payloads
+          root_count=$(echo "$root_json" | jq -r .count)
+          proj_count=$(echo "$proj_json" | jq -r .count)
+          if [ "$root_count" = "null" ] || [ "$proj_count" = "null" ]; then
+            echo "Traffic API returned null. Ensure the PAT has 'repo' scope and you have push access to both repos." >&2
+            echo "Root payload: $root_json" >&2
+            echo "Proj payload: $proj_json" >&2
+            exit 1
+          fi
+
+          # Build the combined traffic.json matching the frontend schema
+          now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          jq -n \
+            --arg now "$now" \
+            --arg rootRepo "$ROOT_REPO" \
+            --arg projRepo "$PROJ_REPO" \
+            --argjson root "$root_json" \
+            --argjson proj "$proj_json" \
+            '{
+               generatedAt: $now,
+               root: {
+                 repo: $rootRepo,
+                 totalViews: $root.count,
+                 totalUniques: $root.uniques,
+                 views: $root.views
+               },
+               project: {
+                 repo: $projRepo,
+                 totalViews: $proj.count,
+                 totalUniques: $proj.uniques,
+                 views: $proj.views
+               }
+             }' > traffic.json
+
+          echo "Built traffic.json:"
+          cat traffic.json
+
+      - name: Get existing file SHA (if any)
+        env:
+          GH_PAT: ${{ secrets.GH_PAGES_TOKEN }}
+          ROOT_REPO: idobee/idobee.github.io
+          BRANCH: ${{ env.DEFAULT_BRANCH }}
+        run: |
+          set -euo pipefail
+          sha=$(curl -sS -H "Authorization: token ${GH_PAT}" \
+            "https://api.github.com/repos/${ROOT_REPO}/contents/traffic.json?ref=${BRANCH}" | jq -r .sha)
+          if [ "$sha" = "null" ]; then sha=""; fi
+          echo "SHA=$sha" >> "$GITHUB_ENV"
+
+      - name: Publish traffic.json to root repo
+        env:
+          GH_PAT: ${{ secrets.GH_PAGES_TOKEN }}
+          ROOT_REPO: idobee/idobee.github.io
+          BRANCH: ${{ env.DEFAULT_BRANCH }}
+          SHA: ${{ env.SHA }}
+        run: |
+          set -euo pipefail
+          content_b64=$(base64 -w 0 traffic.json)
+          payload=$(jq -n \
+            --arg message "chore(traffic): update traffic.json" \
+            --arg content "$content_b64" \
+            --arg branch "$BRANCH" \
+            --arg sha "$SHA" \
+            'if $sha == "" then {message: $message, content: $content, branch: $branch}
+             else {message: $message, content: $content, branch: $branch, sha: $sha}
+             end')
+
+          curl -sS -X PUT -H "Authorization: token ${GH_PAT}" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "https://api.github.com/repos/${ROOT_REPO}/contents/traffic.json" | jq -r '.content.path + "@" + .commit.sha'
