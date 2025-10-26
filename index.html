@@ -83,6 +83,10 @@
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   const isAndroid = /Android/i.test(ua);
   const isInAppBrowser = /(KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line)/i.test(ua);
+  const isKakao = /KAKAOTALK/i.test(ua);
+  const isInstagram = /Instagram/i.test(ua);
+  const isLine = /Line/i.test(ua);
+  const isNaver = /NAVER/i.test(ua);
 
   // 이미 설치(standalone) 상태면 배너를 표시하지 않음
   const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
@@ -121,13 +125,21 @@
 
   // ✅ iOS + 인앱브라우저 (카카오톡 등)일 때 Safari 안내 표시
   if (isIOS && isInAppBrowser) {
+    let appTip = '만약 Safari가 열리지 않으면, 화면 하단/오른쪽의 <strong>공유하기</strong> 버튼(⬆️)을 누르고 <strong>“Safari에서 열기”</strong> 또는 <strong>“브라우저에서 열기”</strong>를 선택하세요.';
+    if (isKakao) {
+      appTip = '카카오톡 내장 브라우저에서는 우측 상단의 <strong>⋯</strong>(메뉴) 또는 <strong>공유하기</strong>(⬆️) 버튼을 눌러 <strong>“Safari에서 열기”</strong>를 선택하세요.';
+    } else if (isInstagram) {
+      appTip = '인스타그램 내장 브라우저에서는 우측 상단의 <strong>⋯</strong> 메뉴에서 <strong>“Safari에서 열기/기본 브라우저로 열기”</strong>를 선택하세요.';
+    } else if (isLine) {
+      appTip = '라인(라인앱) 내장 브라우저에서는 우측 상단의 <strong>공유하기</strong>(⬆️) 또는 <strong>⋯</strong> 메뉴에서 <strong>“Safari에서 열기”</strong>를 선택하세요.';
+    } else if (isNaver) {
+      appTip = '네이버앱 내장 브라우저에서는 우측 하단의 <strong>⋯</strong> 메뉴에서 <strong>“iOS 기본 브라우저로 열기(Safari)”</strong>를 선택하세요.';
+    }
+
     banner.innerHTML = `
       📌 홈화면 설치를 위해 Safari에서 열어주세요.
       <button id="openSafariBtn">Safari로 열기</button>
-      <span style="display:block; margin-top:6px; font-size:13px; opacity:0.85;">
-        만약 Safari가 열리지 않으면, 화면 하단/오른쪽의 <strong>공유하기</strong> 버튼(⬆️)을 누르고
-        <strong>“Safari에서 열기”</strong> 또는 <strong>“브라우저에서 열기”</strong>를 선택하세요.
-      </span>
+      <span style="display:block; margin-top:6px; font-size:13px; opacity:0.85;">${appTip}</span>
     `;
     banner.style.display = 'block';
 
