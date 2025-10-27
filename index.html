@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakeLucky - 행운을 만들어보세요!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍀 MakeLucky</h1>
+            <p class="subtitle">오늘의 행운을 만들어보세요!</p>
+        </header>
+        
+        <main>
+            <div class="luck-display" id="luckDisplay">
+                <p class="luck-message">버튼을 눌러 행운을 확인하세요</p>
+            </div>
+            
+            <button class="lucky-button" id="luckyButton">
+                <span class="button-icon">✨</span>
+                <span class="button-text">행운 만들기</span>
+            </button>
+            
+            <div class="stats" id="stats">
+                <p>생성된 행운: <span id="count">0</span>개</p>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Made with ❤️ by idobee</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
