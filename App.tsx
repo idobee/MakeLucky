@@ -434,7 +434,6 @@ function App() {
           <span className="text-slate-300">•</span>
           <span>서비스 제공: (주)아이두비</span>
           <VisitorCounter />
-          <span className="text-slate-300">•</span>
           <InstallCounter />
           <span className="text-slate-300">•</span>
           <TrafficCounter />
