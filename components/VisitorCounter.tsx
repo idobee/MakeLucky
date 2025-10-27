@@ -75,20 +75,19 @@ const VisitorCounter: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
-  if (fallback) {
-    const badgeUrl = `https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=${encodeURIComponent('https://idobee.github.io/')}&count_bg=%234F46E5&title_bg=%23F1F5F9&icon=&icon_color=%23E5E7EB&title=%EB%B0%A9%EB%AC%B8%EC%9E%90&edge_flat=true`;
-    return (
-      <a href="https://idobee.github.io/" target="_blank" rel="noreferrer" aria-label="방문자 카운트 배지">
-        <img src={badgeUrl} alt="방문자" className="inline-block align-middle" />
-      </a>
-    );
-  }
-
-  return (
-    <span className="text-slate-500">
-      방문자 수: {count ?? '—'}
+  // Render a local badge-style pill to avoid third-party image blockers
+  const pill = (
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-slate-700 border border-slate-200">
+      <span className="text-slate-600">방문자</span>
+      <span className="font-semibold text-slate-800">{count ?? '—'}</span>
     </span>
   );
+
+  if (fallback) {
+    return pill;
+  }
+
+  return pill;
 };
 
 export default VisitorCounter;
