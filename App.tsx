@@ -23,6 +23,7 @@ import GoogleAd from './components/GoogleAd';
 import RollingAdBanner from './components/RollingAdBanner';
 import VisitorCounter from './components/VisitorCounter';
 import InstallCounter from './components/InstallCounter';
+import TrafficCounter from './components/TrafficCounter';
 
 const toYYYYMMDD = (date: Date): string => {
   return date.toISOString().split('T')[0];
@@ -430,9 +431,28 @@ function App() {
       <footer className="text-center py-6 text-slate-500 text-sm">
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <p>&copy; 2025 AI 행운습관 코치. All rights reserved.</p>
+          <span className="text-slate-300">•</span>
+          <span>서비스 제공: (주)아이두비</span>
           <VisitorCounter />
           <span className="text-slate-300">•</span>
           <InstallCounter />
+          <span className="text-slate-300">•</span>
+          <TrafficCounter />
+        </div>
+        <div className="mt-3 flex items-center justify-center gap-3 flex-wrap">
+          {(() => {
+            const base = (import.meta as any).env?.BASE_URL || '/';
+            const href = (path: string) => new URL(path, base).pathname;
+            return (
+              <>
+                <a className="hover:text-slate-700" href={href('privacy.html')}>개인정보 처리방침</a>
+                <span className="text-slate-300">•</span>
+                <a className="hover:text-slate-700" href={href('terms.html')}>이용약관</a>
+                <span className="text-slate-300">•</span>
+                <a className="hover:text-slate-700" href={href('attributions.html')}>출처/오픈소스</a>
+              </>
+            );
+          })()}
         </div>
       </footer>
     </div>
