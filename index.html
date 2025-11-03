@@ -58,6 +58,19 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
     margin-top: 16px; /* separate from app content */
   }
+    /* Compact by default so it never hides the app content */
+    #pwaInstallBanner.collapsed {
+      display: block;
+      padding: 8px 12px;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #pwaInstallBanner .actions { display: none; margin-top: 8px; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    #pwaInstallBanner.expanded .actions { display: flex; }
+    #pwaInstallBanner .summary { display: inline; }
+    #pwaInstallBanner.expanded .summary { display: none; }
   #pwaInstallBanner button {
     background: #007aff;
     border: none;
@@ -67,6 +80,8 @@
     margin-left: 8px;
     font-size: 14px;
   }
+    #pwaInstallBanner .secondary { background: #64748b; }
+    #pwaInstallBanner .success { background: #34a853; }
 </style>
 
   <!-- Inline guidance bar placed at the bottom of the page flow -->
@@ -171,35 +186,51 @@
     }
 
     banner.innerHTML = `
-      🚀 더 편하게 사용하려면 Safari(또는 기본 브라우저)에서 열어주세요.
-      <div style="margin-top:8px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-        <button id="copyUrlBtn">주소 복사</button>
-        <button id="openChromeBtn" style="background:#34a853">Chrome에서 열기</button>
-        <button id="closeBannerBtn" style="background:#64748b">닫기</button>
-      </div>
-      <div style="margin-top:8px; font-size:13px; opacity:0.9;">
-        <div>${appTipMain}</div>
-        ${appSteps ? `<div style=\"margin-top:4px;\">${appSteps}</div>` : ''}
+      <span class="summary">Safari 또는 기본 브라우저에서 열면 설치가 쉬워요. <button id="expandBannerBtn" class="secondary" style="margin-left:6px;">자세히</button></span>
+      <div class="actions">
+        <div style="margin-bottom:6px; font-size:13px; opacity:0.9;">
+          <div>${appTipMain}</div>
+          ${appSteps ? `<div style=\"margin-top:4px;\">${appSteps}</div>` : ''}
+        </div>
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <button id="copyUrlBtn">주소 복사</button>
+          <button id="openChromeBtn" class="success">Chrome에서 열기</button>
+          <button id="closeBannerBtn" class="secondary">닫기</button>
+        </div>
       </div>
     `;
+    banner.classList.add('collapsed');
     banner.style.display = 'block';
 
+    const dismiss = () => {
+      banner.style.display = 'none';
+      try { sessionStorage.setItem('pwaBannerDismissed', '1'); } catch(_){}
+    };
+
+    document.getElementById('expandBannerBtn')?.addEventListener('click', () => {
+      banner.classList.remove('collapsed');
+      banner.classList.add('expanded');
+    });
     document.getElementById('copyUrlBtn').addEventListener('click', copyUrl);
     document.getElementById('openChromeBtn').addEventListener('click', tryOpenChrome);
-    document.getElementById('closeBannerBtn').addEventListener('click', () => {
-      banner.style.display = 'none';
-    });
+    document.getElementById('closeBannerBtn').addEventListener('click', dismiss);
   }
 
   // ✅ iOS Safari에서는 설치 안내 (Add to Home Screen)
   if (isIOS && !isInAppBrowser) {
+    // show compact summary only; auto-hide quickly so content remains fully visible
     banner.innerHTML = `
-      📲 홈화면에 앱처럼 추가하려면,
-      하단의 <strong>공유 아이콘(⬆️)</strong>을 누른 뒤
-      <strong>“홈 화면에 추가”</strong>를 선택하세요.
+      <span class="summary">홈 화면에 추가하려면 공유(⬆️) → “홈 화면에 추가”를 누르세요.</span>
     `;
+    try {
+      if (sessionStorage.getItem('pwaBannerDismissed') === '1') return;
+    } catch(_){}
+    banner.classList.add('collapsed');
     banner.style.display = 'block';
-    setTimeout(() => banner.style.display = 'none', 20000);
+    setTimeout(() => {
+      banner.style.display = 'none';
+      try { sessionStorage.setItem('pwaBannerDismissed', '1'); } catch(_){ }
+    }, 6000);
   }
 
 })();
