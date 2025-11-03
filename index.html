@@ -60,7 +60,17 @@
     text-align: center;
     box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
     backdrop-filter: blur(4px);
+      /* iOS 하단 제스처/메뉴 영역 확보 */
+      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   }
+    /* 상단 배치용 (인앱 브라우저에서 하단 메뉴 가리지 않도록) */
+    #pwaInstallBanner.pwa-top {
+      top: 0;
+      bottom: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      padding-top: calc(14px + env(safe-area-inset-top, 0px));
+      padding-bottom: 10px;
+    }
   #pwaInstallBanner button {
     background: #007aff;
     border: none;
@@ -174,20 +184,25 @@
     }
 
     banner.innerHTML = `
-      � 더 편하게 사용하려면 Safari(또는 기본 브라우저)에서 열어주세요.
+      🚀 더 편하게 사용하려면 Safari(또는 기본 브라우저)에서 열어주세요.
       <div style="margin-top:8px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
         <button id="copyUrlBtn">주소 복사</button>
         <button id="openChromeBtn" style="background:#34a853">Chrome에서 열기</button>
+        <button id="closeBannerBtn" style="background:#64748b">닫기</button>
       </div>
       <div style="margin-top:8px; font-size:13px; opacity:0.9;">
         <div>${appTipMain}</div>
-        ${appSteps ? `<div style="margin-top:4px;">${appSteps}</div>` : ''}
+        ${appSteps ? `<div style=\"margin-top:4px;\">${appSteps}</div>` : ''}
       </div>
     `;
+    banner.classList.add('pwa-top'); // 하단 메뉴 가리지 않도록 상단 고정
     banner.style.display = 'block';
 
     document.getElementById('copyUrlBtn').addEventListener('click', copyUrl);
     document.getElementById('openChromeBtn').addEventListener('click', tryOpenChrome);
+    document.getElementById('closeBannerBtn').addEventListener('click', () => {
+      banner.style.display = 'none';
+    });
   }
 
   // ✅ iOS Safari에서는 설치 안내 (Add to Home Screen)
