@@ -440,8 +440,12 @@ function App() {
         </div>
         <div className="mt-3 flex items-center justify-center gap-3 flex-wrap">
           {(() => {
-            const base = (import.meta as any).env?.BASE_URL || '/';
-            const href = (path: string) => new URL(path, base).pathname;
+            const base = ((import.meta as any).env?.BASE_URL as string) || '/';
+            const href = (path: string) => {
+              const b = base.endsWith('/') ? base : base + '/';
+              const p = path.startsWith('/') ? path.slice(1) : path;
+              return b + p;
+            };
             return (
               <>
                 <a className="hover:text-slate-700" href={href('privacy.html')}>개인정보 처리방침</a>
