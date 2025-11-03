@@ -6,7 +6,7 @@ export function hitInstallOnce(): void {
     const flag = 'makelucky-install-counted';
     const counted = localStorage.getItem(flag) === '1';
     if (counted) return;
-    const base = String((import.meta as any).env?.VITE_METRICS_API_BASE || '').trim();
+    const base = String(((window as any).METRICS_API_BASE ?? (import.meta as any).env?.VITE_METRICS_API_BASE ?? '')).trim();
     if (base) {
       fetch(`${base}/api/installs/hit`, { method: 'POST' }).catch(() => {});
     } else {
@@ -20,7 +20,7 @@ export function hitInstallOnce(): void {
 
 export async function getInstalls(): Promise<number | null> {
   try {
-    const base = String((import.meta as any).env?.VITE_METRICS_API_BASE || '').trim();
+    const base = String(((window as any).METRICS_API_BASE ?? (import.meta as any).env?.VITE_METRICS_API_BASE ?? '')).trim();
     if (base) {
       const res = await fetch(`${base}/api/installs`, { headers: { 'Cache-Control': 'no-cache' } });
       if (!res.ok) return null;

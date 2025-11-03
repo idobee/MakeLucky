@@ -18,7 +18,7 @@ const VisitorCounter: React.FC = () => {
     let cancelled = false;
     const run = async () => {
       try {
-        const METRICS_BASE = String((import.meta as any).env?.VITE_METRICS_API_BASE || '').trim();
+        const METRICS_BASE = String(((window as any).METRICS_API_BASE ?? (import.meta as any).env?.VITE_METRICS_API_BASE ?? '')).trim();
 
         // Prefer Worker API if configured
         if (METRICS_BASE) {
@@ -43,7 +43,7 @@ const VisitorCounter: React.FC = () => {
         }
 
         // Fallback to CountAPI
-        const getRes = await fetch(`${COUNTAPI_BASE}/get/${encodeURIComponent(NAMESPACE)}/${encodeURIComponent(KEY)}`);
+  const getRes = await fetch(`${COUNTAPI_BASE}/get/${encodeURIComponent(NAMESPACE)}/${encodeURIComponent(KEY)}`);
         if (!getRes.ok) throw new Error('countapi get failed');
         const getJson = await getRes.json();
         if (!cancelled && typeof getJson?.value === 'number') {

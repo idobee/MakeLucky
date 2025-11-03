@@ -12,7 +12,7 @@ const InstallCounter: React.FC = () => {
     let cancelled = false;
     const run = async () => {
       try {
-        const METRICS_BASE = String((import.meta as any).env?.VITE_METRICS_API_BASE || '').trim();
+        const METRICS_BASE = String(((window as any).METRICS_API_BASE ?? (import.meta as any).env?.VITE_METRICS_API_BASE ?? '')).trim();
         if (METRICS_BASE) {
           const res = await fetch(`${METRICS_BASE}/api/installs`, { headers: { 'Cache-Control': 'no-cache' } });
           if (!res.ok) throw new Error('metrics get failed');
