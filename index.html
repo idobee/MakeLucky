@@ -41,6 +41,8 @@
 <link rel="stylesheet" href="./index.css">
 </head>
   <body>
+    <!-- Inline guidance bar (non-popup) shown at top when needed -->
+    <div id="pwaInstallBanner"></div>
     <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
   <script type="module" src="./bootstrap.ts"></script>
@@ -48,29 +50,15 @@
 <style>
   #pwaInstallBanner {
     display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: static; /* inline bar, not overlay */
+    width: 100%;
     background: rgba(30, 30, 30, 0.95);
     color: #fff;
-    padding: 14px 18px;
+    padding: 12px 16px;
     font-size: 15px;
-    z-index: 9999;
     text-align: center;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
-    backdrop-filter: blur(4px);
-      /* iOS 하단 제스처/메뉴 영역 확보 */
-      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   }
-    /* 상단 배치용 (인앱 브라우저에서 하단 메뉴 가리지 않도록) */
-    #pwaInstallBanner.pwa-top {
-      top: 0;
-      bottom: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      padding-top: calc(14px + env(safe-area-inset-top, 0px));
-      padding-bottom: 10px;
-    }
   #pwaInstallBanner button {
     background: #007aff;
     border: none;
@@ -82,9 +70,6 @@
   }
 </style>
 
-<div id="pwaInstallBanner">
-  <!-- 내용은 자바스크립트에서 동적으로 변경됩니다 -->
-</div>
 
 <script>
 (function() {
@@ -195,7 +180,6 @@
         ${appSteps ? `<div style=\"margin-top:4px;\">${appSteps}</div>` : ''}
       </div>
     `;
-    banner.classList.add('pwa-top'); // 하단 메뉴 가리지 않도록 상단 고정
     banner.style.display = 'block';
 
     document.getElementById('copyUrlBtn').addEventListener('click', copyUrl);
