@@ -41,8 +41,6 @@
 <link rel="stylesheet" href="./index.css">
 </head>
   <body>
-    <!-- Inline guidance bar (non-popup) shown at top when needed -->
-    <div id="pwaInstallBanner"></div>
     <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
   <script type="module" src="./bootstrap.ts"></script>
@@ -58,6 +56,7 @@
     font-size: 15px;
     text-align: center;
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    margin-top: 16px; /* separate from app content */
   }
   #pwaInstallBanner button {
     background: #007aff;
@@ -69,6 +68,9 @@
     font-size: 14px;
   }
 </style>
+
+  <!-- Inline guidance bar placed at the bottom of the page flow -->
+  <div id="pwaInstallBanner"></div>
 
 
 <script>
