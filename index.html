@@ -27,11 +27,47 @@
       .animate-marquee {
         animation: marquee 40s linear infinite;
       }
+      /* Intro overlay (first run) */
+      #introOverlay {
+        position: fixed;
+        inset: 0;
+        background: #000 url('./icons/intro.jpg') center / cover no-repeat;
+        z-index: 10000;
+        display: none; /* only shown when needed */
+        transition: opacity 300ms ease;
+        opacity: 1;
+      }
+      #introOverlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
     </style>
   
 <link rel="stylesheet" href="./index.css">
 </head>
   <body>
+    <!-- Intro overlay (first app use). Tap/click anywhere to continue. -->
+    <div id="introOverlay" role="button" aria-label="터치하면 시작합니다"></div>
+    <script>
+      (function(){
+        try {
+          var key='makelucky-intro-shown-v1';
+          var seen=false;
+          try { seen = localStorage.getItem(key)==='1'; } catch(_) {}
+          var el = document.getElementById('introOverlay');
+          if (!seen && el) {
+            el.style.display='block';
+            var dismiss=function(){
+              try { localStorage.setItem(key,'1'); } catch(_){ }
+              el.classList.add('hidden');
+              setTimeout(function(){ el.style.display='none'; }, 300);
+            };
+            el.addEventListener('click', dismiss);
+            el.addEventListener('touchstart', dismiss, { passive: true });
+          }
+        } catch(_) {}
+      })();
+    </script>
     <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
   <script type="module" src="./bootstrap.ts"></script>
